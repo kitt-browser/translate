@@ -1,0 +1,38 @@
+{
+  "name": "translate",
+  "version": "0.1",
+  "description": "",
+  "author": "",
+  "dependencies": {
+    "jquery": "2.0.*",
+    "underscore": "~1.6.0",
+    "bootstrap": "~3.1.1"
+  },
+  "devDependencies": [],
+  "install": {
+    "path": "vendor",
+    "sources": {
+      "jquery": {
+        "mapping": [
+          {
+            "bower_components/jquery/jquery.min.js": "jquery.js"
+          }
+        ]
+      },
+      "bootstrap": {
+        "mapping": [
+          {
+            "bower_components/bootstrap/dist/js/bootstrap.min.js": "bootstrap.js"
+          },
+          {
+            "bower_components/bootstrap/dist/css/bootstrap.min.css": "bootstrap.css"
+          },
+          {
+            "bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.svg": "glyphicons-halflings-regular.svg"
+          }
+        ]
+      }
+    }
+  },
+  "private": true
+}

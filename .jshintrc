@@ -1,0 +1,16 @@
+{
+  "strict": false,
+
+  "globals": {
+    "chrome": false,
+    "console": false,
+    "alert": false,
+    "module": false,
+    "process": false,
+    "window": false,
+    "exports": false,
+    "require": false,
+    "localStorage": false,
+    "XMLHttpRequest": false
+  }
+}
