@@ -38,7 +38,6 @@
     "watchify": "^0.6.4"
   },
   "dependencies": {
-    "browserify-compile-templates": "^0.1.0",
     "jadeify": "^2.1.1",
     "minilog": "^2.0.4"
   }
