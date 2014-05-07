@@ -1,3 +1,5 @@
+"use strict";
+
 var getFromStorage = function(key, callback) {
   chrome.storage.local.get(key, function(items) {
     callback(items[key]);
