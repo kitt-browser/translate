@@ -77,7 +77,7 @@ module.exports = (grunt) ->
       dist:
         files: "<%= browserify.dev.files %>",
         options:
-          transform: ['cssify', 'uglifyify']
+          transform: ['cssify','jadeify', 'uglifyify']
 
     watch:
       browserify:
