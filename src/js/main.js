@@ -8,7 +8,7 @@ $.support.cors = true;
 
 var menu = chrome.contextMenus.create({
   id: "translatorContextMenu",
-  title: 'FOOBAR',
+  title: 'translate me',
   contexts : ['selection'],
   enabled: true
 });
@@ -40,7 +40,6 @@ function translate(text, sourceLang, targetLang, callback) {
   console.log('translate', sourceLang, targetLang);
 
   var params = {
-    key: 'AIzaSyBIR5kt0HcaEU4ObATY5HrForJgV0K_RiI',
     target: targetLang,
     q: text
   };
@@ -51,7 +50,7 @@ function translate(text, sourceLang, targetLang, callback) {
 
   console.log('size of text', text.length, text);
 
-  $.get('https://www.googleapis.com/language/translate/v2', params, function(data) {
+  $.get('https://google-translate-proxy-dev.salsitasoft.com/translate', params, function(data) {
     console.log('google api success');
     data = JSON.parse(data);
     callback(null, data);
