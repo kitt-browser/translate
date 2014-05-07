@@ -2,6 +2,7 @@
 
 var $ = require('../vendor/jquery/jquery');
 var _ = require('../vendor/underscore/underscore');
+var common = require('./common');
 
 $.support.cors = true; 
 
@@ -16,18 +17,49 @@ chrome.contextMenus.onClicked.addListener(function(info) {
   if (info.menuItemId !== menu) {
     return;
   }
-  $.get('https://www.googleapis.com/language/translate/v2', {
-    key: 'AIzaSyBIR5kt0HcaEU4ObATY5HrForJgV0K_RiI',
-    target: 'en',
-    source: 'cs',
-    q: info.selectionText
-  }, function(data) {
-    data = JSON.parse(data);
-    sendMessage({text: data.data.translations[0].translatedText});
-  }).fail(function(err) {
-    console.log('error', err);
+  common.getFromStorage('sourceLang', function(lang) {
+    translate(info.selectionText, (lang || null), 'en', function(err, data) {
+      if (err) {
+        console.log('error:', err);
+        return sendMessage({err: err});
+      }
+      sendMessage({
+        err: null,
+        originalText: info.selectionText,
+        text: data.data.translations[0].translatedText
+      });
+    });
   });
 });
+
+
+function translate(text, sourceLang, targetLang, callback) {
+  targetLang = targetLang || 'en';
+  sourceLang = sourceLang || null;
+
+  console.log('translate', sourceLang, targetLang);
+
+  var params = {
+    key: 'AIzaSyBIR5kt0HcaEU4ObATY5HrForJgV0K_RiI',
+    target: targetLang,
+    q: text
+  };
+
+  if (sourceLang != 'auto') {
+    params.source = sourceLang;
+  }
+
+  console.log('size of text', text.length, text);
+
+  $.get('https://www.googleapis.com/language/translate/v2', params, function(data) {
+    console.log('google api success');
+    data = JSON.parse(data);
+    callback(null, data);
+  }).fail(function(err) {
+    console.log('error', err);
+    callback(err);
+  });
+}
 
 
 function sendMessage(msg) {
@@ -38,3 +70,27 @@ function sendMessage(msg) {
     });
   });
 }
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  switch(request.command) {
+    case 'loadLanguage':
+      common.getFromStorage('sourceLang', function(lang) {
+        sendResponse(lang);
+      });
+      return true;
+    case 'translate':
+      console.log('translating...');
+      translate(request.text, request.source, 'en', function(err, data) {
+        if (err) {
+          console.log('translating failed', err);
+          return sendResponse({err: err});
+        }
+        console.log('translated');
+        var text = data.data.translations[0].translatedText;
+        common.saveToStorage('sourceLang', request.source, function() {
+          sendResponse({err: null, text: text});
+        });
+      });
+      return true;
+  }
+});

@@ -67,7 +67,7 @@ module.exports = (grunt) ->
           {src: 'src/js/main.js', dest: "#{BUILD}/js/main.js"}
         ]
         options:
-          transform: ['cssify', 'browserify-compile-templates']
+          transform: ['cssify', 'jadeify']
       watch:
         files: "<%= browserify.dev.files %>",
         options:
@@ -83,9 +83,9 @@ module.exports = (grunt) ->
       browserify:
         files: ['src/**/*.js', 'src/**/*.css']
         tasks: ['browserify:dev', 'crx:main']
-      html:
-        files: ['src/**/*.html', 'src/img/**/*.*', 'src/manifest.json']
-        tasks: ['copy', 'crx:main']
+      other:
+        files: ['src/**/*.jade', 'src/img/**/*.*', 'src/manifest.json']
+        tasks: ['copy', 'browserify:dev', 'crx:main']
 
     copy:
       manifest:

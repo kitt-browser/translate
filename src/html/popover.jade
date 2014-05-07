@@ -1,0 +1,12 @@
+#translatePopup.modal.fade(tabindex='-1', role='dialog', aria-labelledby='translate-label', aria-hidden='true')
+  .modal-dialog.modal-sm
+    .modal-content
+      .modal-header
+      #content.modal-body
+      .modal-footer
+        .row
+          button(type='button')#translate.btn.btn-primary Translate using this language
+          select#language
+            option(value='auto') autodetect
+            each l in ['cs', 'en', 'de']
+              option(value=l)= l
