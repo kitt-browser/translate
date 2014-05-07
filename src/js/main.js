@@ -50,7 +50,7 @@ function translate(text, sourceLang, targetLang, callback) {
 
   console.log('size of text', text.length, text);
 
-  $.get('https://google-translate-proxy-dev.salsitasoft.com/translate', params, function(data) {
+  $.get('http://google-translate-proxy-dev.salsitasoft.com/translate', params, function(data) {
     console.log('google api success');
     data = JSON.parse(data);
     callback(null, data);
