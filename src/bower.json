@@ -6,12 +6,18 @@
   "dependencies": {
     "jquery": "2.0.*",
     "underscore": "~1.6.0",
-    "bootstrap": "~3.1.1"
+    "bootstrap": "~3.1.1",
+    "bootstrap-modal": "~2.2.5"
   },
   "devDependencies": [],
   "install": {
     "path": "vendor",
     "sources": {
+      "bootstrap-modal": [
+        "bower_components/bootstrap-modal/css/*",
+        "bower_components/bootstrap-modal/img/*",
+        "bower_components/bootstrap-modal/js/*"
+      ],
       "jquery": {
         "mapping": [
           {
@@ -34,5 +40,9 @@
       }
     }
   },
-  "private": true
+  "private": true,
+  "resolutions": {
+    "jquery": "2.0.*",
+    "bootstrap": "~3.1.1"
+  }
 }

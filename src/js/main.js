@@ -24,6 +24,7 @@ chrome.contextMenus.onClicked.addListener(function(info) {
         return sendMessage({err: err});
       }
       sendMessage({
+        event: 'translation:finished',
         err: null,
         originalText: info.selectionText,
         text: data.data.translations[0].translatedText
@@ -36,6 +37,8 @@ chrome.contextMenus.onClicked.addListener(function(info) {
 function translate(text, sourceLang, targetLang, callback) {
   targetLang = targetLang || 'en';
   sourceLang = sourceLang || null;
+
+  sendMessage({event:'translation:loading'});
 
   console.log('translate', sourceLang, targetLang);
 
