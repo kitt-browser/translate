@@ -1,6 +1,6 @@
 {
   "name": "translator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Translate extension.",
   "private": "true",
   "scripts": {
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/realyze/watchpocket.git"
+    "url": "git://github.com/kitt-browser/translate.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/realyze/watchpocket/issues"
+    "url": "https://github.com/kitt-browser/translate/issues"
   },
-  "homepage": "https://github.com/realyze/watchpocket",
+  "homepage": "https://github.com/kitt-browser/translate",
   "devDependencies": {
     "bower-installer": "~0.6.2",
     "browserify": "^3.38.1",

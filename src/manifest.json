@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "<%= name %>",
   "description": "Displays words as other words.",
-  "version": "<%= version %>",
+  "version": "0.1.1",
   "icons": {
     "128": "img/appIcon.png"
   },
@@ -13,7 +13,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*"],
+      "matches": [
+        "http://*/*"
+      ],
       "js": [
         "js/content.js"
       ],
@@ -33,4 +35,3 @@
     "auth.html"
   ]
 }
-
