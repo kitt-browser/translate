@@ -1,13 +1,276 @@
+/* Modal */
 
-#translatePopup .modal-body {
-  padding: 5px;
+#salsa-ui-modal {
+	width: 100%;
+	position: absolute;
+	z-index: 10001;
+	transform-origin: 0 100%;
+	-webkit-transform-origin: 0 100%;
+	bottom: 0;
+	left: 0;
 }
 
-
-#translatePopup {
-  /*
-  bottom: 10px !important;
-  top: auto;
-  */
+#salsa-ui-modal .ui-modal-inner {
+	position: relative;
+	background-color: #fff;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 15px;
+	min-height: 100px;
+	border-top: 1px solid #999;
 }
 
+#salsa-ui-modal.animate-in .ui-modal-inner {
+	-webkit-animation-name: bounceInUp;
+  	animation-name: bounceInUp;
+	-webkit-animation-duration: 0.5s;
+  	animation-duration: 0.5s;
+  	-webkit-animation-fill-mode: none;
+  	animation-fill-mode: none;
+}
+
+#salsa-ui-modal.animate-out .ui-modal-inner {
+	-webkit-animation-name: bounceOutDown;
+  	animation-name: bounceOutDown;
+	-webkit-animation-duration: 0.5s;
+  	animation-duration: 0.5s;
+  	-webkit-animation-fill-mode: none;
+  	animation-fill-mode: none;
+}
+
+#salsa-ui-modal .content {
+	position: relative;
+	margin-bottom: 15px;
+	z-index: 1;
+	-webkit-transition: opacity 0.3s ease-in-out;
+	transition: opacity: 0.3s ease-in-out;
+	-webkit-transition-delay: 0.2s;
+	transition-delay: 0.2s;
+}
+
+#salsa-ui-modal .content p {
+	color: #000;
+	margin: 0;
+	padding: 0;
+}
+
+#salsa-ui-modal .controls {
+	position: relative;
+	overflow: auto;
+	z-index: 1;
+	-webkit-transition: opacity 0.3s ease-in-out;
+	transition: opacity: 0.3s ease-in-out;
+	-webkit-transition-delay: 0.2s;
+	transition-delay: 0.2s;
+}
+
+#salsa-ui-modal .controls .select-language {
+	float: right;
+}
+
+#salsa-ui-modal .loader {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	width: 100%;
+	background-color: red;
+	-webkit-transition: opacity 0.3s ease-in-out;
+	transition: opacity: 0.3s ease-in-out;
+	background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIgAAAAYCAYAAAAh3LURAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NTU3NUE0NDFEQzdCMTFFM0JFN0VCRkY5MkNDQUM4MTIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NTU3NUE0NDJEQzdCMTFFM0JFN0VCRkY5MkNDQUM4MTIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo1NTc1QTQzRkRDN0IxMUUzQkU3RUJGRjkyQ0NBQzgxMiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo1NTc1QTQ0MERDN0IxMUUzQkU3RUJGRjkyQ0NBQzgxMiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PmGHdVUAAAUOSURBVHja7Fq9jtNAELajK2kWCQQFTVKCaJwGCYkm4QlwHiEpoHca+riHInmEC09A0iAh0ZwbBAUFbkEg4YY+zJy+teb2djdOzsnFF1Za2Vl74tndb775scPA0h72/8Z0aFOfWC7PqOd8/Lq4VQQNav03wRBzUhgaL14FaXDEbbVaea+HBjB6WEAGR2qCgK4ndGDwRBiaUx81ASgEjjZOeY5TBjmBoyPvyR4/43vi6POH9EDnwOs/J73zfQGkJTafrWtBnTe7Q5uemhuPsS5bHoaUAMtBN15UY2ELAxwR5j+h8+EBgmMC4z2lc7Wv554Il8JWlREA+hXkmDnadO+ogayqbACB2yxwXB6g3hrczCCXGBsAD4j9sjof2iJwKICD26CiXNFQcDgbLSwvOhtHl87zQ9OPQMGxX8cWMxE4vtPhbBdszgwyhFUxe1RamKYFpxuC5KDdpONSe5cuJsZ5rbT68dGTGP8dGxnQ/OmXT85n/Zrfc8rdjX8uHVlXhPsTBzVzsJ26XAxZoA7OtQWOdaBK+iQim8vBMhGeFQn9xqRfcUXdfPFHImS62s2Q7lNx6xS/+VpaR7DdEpMsagKGor7AhGYEhpA7AtvzQJiuJxZgKOqlHC12yF3KYbPMDeBrpwwgWugQG6jnwhlWx9gAWwxSGO41g05tvflic3izFenGwXoHY1qHq+pmA0dEYBhDjwDZlwZHRCCQrn5Ev0Pqt+vKxFo7YKUpQNeXTEHnqVjoCRjGKieZgs4vyIFhpHVOYYUZ3N9S3D+le9bSryWwK/DsHKygRIqc0dhMXxfP6jHI69aNwGDVbRcB6TqARDWwRw8WtiRAXGIkgERPKhHsUcrZaBoguSQnzjMjRpqJqD/eYiqFI/OZWdxcbrlvn7rtHCCFsI6rtrjCJOYakASo9jZyoH4JaltdYOm5Vmdz6XwduhW7AIheeAWfGTgCQb7OtLgy+hnoVEbTvolnluh7W7nCw365zYL32K5Dt50ARAYzCeoiVovg2geCLVminmsfW5GNcsumbyunLXFo0TuCbvNrAsgh61YdIKh9pMIyTx21j+UGi6IQj/hydhmnlHKIR7xyIk6ZAVy8AQsd9OGdUU46D/awhq5A8zp0Uy72d2RITsb+/e6+KoNUUnYsNqlnuI3KjTZ8Jqx7yimvJ04ZiyD0gpzMBnxyAHcXbpL1/c5uj5kQc6q7eQuJyGr2qhulusoHELyA/YOjBMf5+PO3Yc8CjoUmipaYUF8sPk/oDDGHLS7xvcwaYCHbqHlEIsuZQnZAYMp8cgSSSGQ5pRxtgpkVnFsjXN+gSjxVIWtTG46XtZyadKvMEqj+FrasCMxxKtJqJZijHCeQKAGOBK6+x+ehg46G+iaLgmXRyOdDUQwbGhQ8RiU19yyyU05aqINKWeZMpqXynRFe+S+M/065EEWWKCumOs4ZPHj9TS+mlBnpWogAr3SzI1PXdbqtKZZp1y9BXX7LQrrrl61KVnYZPKIeM5CvUrgAp8ffv1zlBoPws7I7L36kYdDwJj5uShwWPt9TLNIo3XSr/D1IA4HR5lgJlsWL32cqFyVt7YribeKpm6rbpu2kweShS/MD09Uh4+rS4i/gJqM910MOWbeN6yBNZA8l4iNf+p1WyT6ORbejAQi+R7FG7pYaRVaxhnPjdTsagBjZFKdvE/PNKApSw6D6V3LHottGrdFZjOdjHPb7S7w5/a/bFbKYfwIMAKOI07bXcehqAAAAAElFTkSuQmCC) no-repeat center center;
+}
+
+/* Backdrop */
+
+#salsa-ui-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0,0,0,0.7);
+	z-index: 10000;
+}
+
+#salsa-ui-backdrop.animate-in {
+	-webkit-animation-name: fadeIn;
+  	animation-name: fadeIn;
+	-webkit-animation-duration: 0.5s;
+  	animation-duration: 0.5s;
+  	-webkit-animation-fill-mode: both;
+  	animation-fill-mode: both;
+}
+
+#salsa-ui-backdrop.animate-out {
+	-webkit-animation-name: fadeOut;
+  	animation-name: fadeOut;
+	-webkit-animation-duration: 0.5s;
+  	animation-duration: 0.5s;
+  	-webkit-animation-fill-mode: both;
+  	animation-fill-mode: both;
+}
+
+/* UI Logic */
+
+body.salsa-ui-modal-show {
+	position: relative;
+}
+
+#salsa-ui-modal,
+#salsa-ui-backdrop {
+	display: none;
+}
+
+body.salsa-ui-modal-show #salsa-ui-modal,
+body.salsa-ui-modal-show #salsa-ui-backdrop {
+	display: block;
+}
+
+#salsa-ui-modal .content,
+#salsa-ui-modal .controls {
+	opacity: 0;
+}
+
+#salsa-ui-modal.translation-loaded .content,
+#salsa-ui-modal.translation-loaded .controls {
+	opacity: 1;
+}
+
+#salsa-ui-modal.translation-loaded .loader {
+	opacity: 0;
+}
+
+/* Animations */
+
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes bounceInUp {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(2000px);
+    transform: translateY(2000px);
+  }
+
+  60% {
+    opacity: 1;
+    -webkit-transform: translateY(-30px);
+    transform: translateY(-30px);
+  }
+
+  80% {
+    -webkit-transform: translateY(10px);
+    transform: translateY(10px);
+  }
+
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceInUp {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(2000px);
+    -ms-transform: translateY(2000px);
+    transform: translateY(2000px);
+  }
+
+  60% {
+    opacity: 1;
+    -webkit-transform: translateY(-30px);
+    -ms-transform: translateY(-30px);
+    transform: translateY(-30px);
+  }
+
+  80% {
+    -webkit-transform: translateY(10px);
+    -ms-transform: translateY(10px);
+    transform: translateY(10px);
+  }
+
+  100% {
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@-webkit-keyframes bounceOutDown {
+  0% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  20% {
+    opacity: 1;
+    -webkit-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(2000px);
+    transform: translateY(2000px);
+  }
+}
+
+@keyframes bounceOutDown {
+  0% {
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  20% {
+    opacity: 1;
+    -webkit-transform: translateY(-20px);
+    -ms-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(2000px);
+    -ms-transform: translateY(2000px);
+    transform: translateY(2000px);
+  }
+}

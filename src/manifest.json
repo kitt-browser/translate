@@ -20,14 +20,15 @@
         "js/content.js"
       ],
       "css": [
-        "vendor/css-modal/modal.css"
+        "css/content.css"
       ]
     }
   ],
   "permissions": [
     "http://*/*",
     "https://*/*",
-    "contextMenus"
+    "contextMenus",
+    "storage"
   ],
   "web_accessible_resources": [
     "img/*",
