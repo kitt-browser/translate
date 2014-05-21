@@ -8,7 +8,7 @@ $.support.cors = true;
 
 var menu = chrome.contextMenus.create({
   id: "translatorContextMenu",
-  title: 'translate me',
+  title: 'Translate',
   contexts : ['selection'],
   enabled: true
 });
