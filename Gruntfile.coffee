@@ -111,7 +111,13 @@ module.exports = (grunt) ->
             src: ['*.html']
             cwd: 'src'
             dest: "#{BUILD}/html"
+          }, {
+            expand: yes
+            src: ['vendor/jquery-ui-scalebreaker/iscroll-lite.js']
+            cwd: 'src'
+            dest: "#{BUILD}/js"
           }
+
         ]
     crx:
       main:

@@ -19,6 +19,7 @@
   "devDependencies": {
     "bower-installer": "^0.7.1",
     "browserify": "^4.1.5",
+    "browserify-shim": "^3.5.0",
     "cssify": "^0.5.1",
     "debug": "^0.8.1",
     "grunt": "^0.4.5",

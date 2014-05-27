@@ -51,7 +51,7 @@ function translate(text, sourceLang, targetLang, callback) {
     params.source = sourceLang;
   }
 
-  console.log('size of text', text.length, text);
+  console.log('params to google API', params);
 
   $.get('http://google-translate-proxy-dev.salsitasoft.com/translate', params, function(data) {
     console.log('google api success');

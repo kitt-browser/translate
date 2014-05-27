@@ -6,6 +6,11 @@ var _ = require('../vendor/underscore/underscore');
 
 require('../css/content.css');
 
+/*
+require('../vendor/jquery-ui-scalebreaker/jquery-ui-1.10.4.custom.min');
+require('../vendor/jquery-ui-scalebreaker/jq-scalebreaker.css');
+require('../vendor/jquery-ui-scalebreaker/jq-scalebreaker');
+*/
 var _jQuery = $.noConflict(true);
 
 
@@ -39,6 +44,7 @@ var _jQuery = $.noConflict(true);
 
     // Get the source language (selected by the user)
     var source = slsModal.find('.select-language option:selected').val();
+    console.log('SOURCE LANG', source, slsModal.find('.select-language option:selected').attr('value'));
 
     chrome.runtime.sendMessage(null, {
       command: 'translate',
@@ -47,6 +53,7 @@ var _jQuery = $.noConflict(true);
     }, function(res) {
       if (res.err) {
         console.log('error', res.err);
+        window.alert('Oops... Failed to translate. Sorry!');
         hideTranslationPopup();
         // TODO: Show an error.
         return;
@@ -81,9 +88,9 @@ var _jQuery = $.noConflict(true);
   function showTranslation(text) {
     chrome.runtime.sendMessage(null, {command: 'loadLanguage'}, function(lang) {
 
-      console.log("val: " + lang);
-
-      slsModal.find('.select-language').val(lang);
+      if (lang) {
+        slsModal.find('.select-language').val(lang);
+      }
 
       // Set the translated popup text & show it
       slsModal.find('.translate-result').text(text);
@@ -133,14 +140,13 @@ var _jQuery = $.noConflict(true);
 
     // Add modal content template
     $(slsModal).append($(template()));
-    
+
     // Retranslate the text on select change
     $('.select-language').on('change', translate);
 
-
     chrome.runtime.onMessage.addListener(
       function(request, sender, sendResponse) {
-        console.log('message received:', request.event);
+        console.log('message received:', request.event, request);
 
         // Show loader
         slsModal.removeClass('translation-loaded');
@@ -154,6 +160,7 @@ var _jQuery = $.noConflict(true);
             if (request.err) {
               originalText = null;
               console.log('error', request.err);
+              window.alert('Oops... Failed to translate. Sorry!');
               hideTranslationPopup();
             }
 
