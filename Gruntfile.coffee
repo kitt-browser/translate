@@ -98,6 +98,7 @@ module.exports = (grunt) ->
             grunt.template.process(content, data: {
               version: grunt.config('pkg.version')
               name: grunt.config('pkg.name')
+              description: grunt.config('pkg.description')
             })
       main:
         files: [
