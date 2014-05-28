@@ -2,9 +2,9 @@
   $.widget "salsita.scalebreaker",
 
     # TODO:
-    # fix non-mobile websites scaling back to a tiny dialog (correct but wrong)
     # add scale to center
-    # make instanceable html?
+    # refresh for orientation change
+    # make instanceable html? no ids?
 
     options:
       cssAnimated: true
@@ -15,6 +15,8 @@
       closeOnBackdrop: true
       denyUserScroll: true
       refreshOnScroll: true
+      mobileFriendlyInitialWidth: 320
+      mobileFriendlyMaxWidth: 568
       debug: false
 
     _create: ->
@@ -35,9 +37,11 @@
       @content = null
       @close = null
       # Dynamic data based on actual user values.
-      @fullPageHeight = null
+      @fullPageDimensions = {}
       @scaleFactor = null
       @currentViewportOffset = null
+      @isMobileBrowser = (/iPhone|iPod|Android|BlackBerry/).test(navigator.userAgent)
+      @state = 'hidden'
       @_initWidget()
 
     _initWidget: ->
@@ -53,34 +57,59 @@
       # The widget stays in the DOM so any 3rd party manipulation of it's content is A-okay at any time.
       @changeDialogContent @options.dialogContent
 
-    _setFullPageHeight: ->
-      @fullPageHeight = Math.max(document.body.offsetHeight,
-        document.documentElement.clientHeight,
-        document.documentElement.scrollHeight,
-        document.documentElement.offsetHeight)
-      # Apply to wrapper.
-      @wrapper.css
-        'height': @fullPageHeight
-
-    _getCurrentViewport: ->
-      bodyOverflow = $('body').css 'overflow'
+    _setWrapperDimensions: ->
+      # Save any existing inline styles on body.
+      bodyInlineStyle = $('body').attr 'style'
       # Hide the scrollbars so the calculations don't fail.
       $('body').css
         'overflow': 'hidden'
-      @scaleFactor = window.innerWidth/document.documentElement.clientWidth
+      @fullPageDimensions.Width = Math.max(document.body.offsetWidth,
+        document.documentElement.clientWidth,
+        document.documentElement.scrollWidth,
+        document.documentElement.offsetWidth)
+      @fullPageDimensions.Height = Math.max(document.body.offsetHeight,
+        document.documentElement.clientHeight,
+        document.documentElement.scrollHeight,
+        document.documentElement.offsetHeight)
+      # Not setting max width in a browser with physical scrollbars makes it desktop compatible.
+      if @isMobileBrowser
+        @wrapper.css
+          'width': @fullPageDimensions.Width
+          'height': @fullPageDimensions.Height
+      else
+        @wrapper.css
+          'height': @fullPageDimensions.Height
+      # Revert back to the original page value.
+      if bodyInlineStyle
+        $('body').attr 'style', bodyInlineStyle
+      else
+        $('body').removeAttr 'style'
+
+    _getCurrentViewport: ->
+      @scaleFactor = window.innerWidth/@fullPageDimensions.Width
       @_logMessage 'scale factor', @scaleFactor
       # This may be too iPhony (though nice), needs testing across browsers and devices.
       @currentViewportOffset = [window.pageXOffset, window.pageYOffset]
       @_logMessage 'current viewport offset', @currentViewportOffset
-      # Revert back to the original page value.
-      $('body').css
-        'overflow': bodyOverflow
 
     _rescaleAndReposition: ->
-      @dialog.css
-        'left': @currentViewportOffset[0]
-        'transform': "scale(#{@.scaleFactor})"
-        '-webkit-transform': "scale(#{@.scaleFactor})"
+      # Detect if the website is mobile friendly and apply custom styles.
+      if !@isMobileBrowser
+        @dialog.css
+          'left': @currentViewportOffset[0]
+      else if @isMobileBrowser and (@fullPageDimensions.Width > @options.mobileFriendlyMaxWidth)
+        mobileFriendlyScaleFactor = @fullPageDimensions.Width / @options.mobileFriendlyInitialWidth
+        @dialog.css
+          'width': @options.mobileFriendlyInitialWidth
+          'left': @currentViewportOffset[0]
+          'transform': "scale(#{@scaleFactor * mobileFriendlyScaleFactor})"
+          '-webkit-transform': "scale(#{@scaleFactor * mobileFriendlyScaleFactor})"
+      else
+        @dialog.css
+          'left': @currentViewportOffset[0]
+          'transform': "scale(#{@scaleFactor})"
+          '-webkit-transform': "scale(#{@scaleFactor})"
+      # Positioning to the viewport, should include more and smarter positions (soon!).
       if @options.dialogPosition is 'top'
         @dialog.css
           'top': @currentViewportOffset[1]
@@ -88,7 +117,7 @@
           '-webkit-transform-origin': '0 0'
       if @options.dialogPosition is 'bottom'
         @dialog.css
-          'bottom': @fullPageHeight - (@currentViewportOffset[1] + window.innerHeight)
+          'bottom': @fullPageDimensions.Height - (@currentViewportOffset[1] + window.innerHeight)
           'transform-origin': '0 100%'
           '-webkit-transform-origin': '0 100%'
 
@@ -116,7 +145,8 @@
       @close.on "click.#{@options.idNamespace}", (e) ->
         _self.hide()
       # Deny user touch scrolling while widget is visible.
-      # This solves a lot of proxy UX problems, visual browser prolapses and code complexity for the moment.
+      # This solves a lot of proxy UX problems, visual browser glitches (Android stock) and code complexity for the moment.
+      # Due to native browser features this may not be enough to prevent all scrolling.
       if @options.denyUserScroll
         $('body').on "touchmove.#{@options.idNamespace}", (e) ->
           e.preventDefault()
@@ -135,6 +165,7 @@
       if @options.refreshOnScroll
         $(window).on "scroll.#{@options.idNamespace}",(e) ->
           _self.refresh()
+      @state = 'shown'
       @_logMessage 'showing widget'
 
     hide: ->
@@ -162,6 +193,7 @@
       # Remove the scroll event bind.
       if @options.refreshOnScroll
         $(window).off "scroll.#{@options.idNamespace}"
+      @state = 'hidden'
       @_logMessage 'hiding widget'
 
     changeDialogContent: (content) ->
@@ -169,10 +201,16 @@
       @refresh()
       @_logMessage 'adding content to dialog', content
 
+    getContentElement: ->
+      return @content
+
+    getDialogState: ->
+      return @state
+
     refresh: ->
       # Sets height of the backdrop, important step prone to potential issues.
       # Position fixed cannot be used due to iPhone post-process moving elements relative to page edge during user scaling.
-      @_setFullPageHeight()
+      @_setWrapperDimensions()
       @_getCurrentViewport()
       @_rescaleAndReposition()
       @_manageScrollbar()
@@ -188,7 +226,7 @@
       @content = null
       @close = null
       @scaleFactor = null
-      @fullPageHeight = null
+      @fullPageDimensions = null
       @currentViewportOffset = null
       if @scrollbar
         @scrollbar.destroy()
