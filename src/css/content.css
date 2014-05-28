@@ -2,8 +2,23 @@
   font-size: 16px;
   font-family: sans-serif;
   color: #000;
+  line-height: 1.3;
 }
 
 #jq-scalebreaker-dialog-content .kitt-translate-select-language {
   float: right;
+}
+
+#jq-scalebreaker-dialog-content .kitt-translate-controls:before,
+#jq-scalebreaker-dialog-content .kitt-translate-controls:after {
+  content: "";
+  display: table;
+}
+
+#jq-scalebreaker-dialog-content .kitt-translate-controls:after {
+clear: both;
+}
+
+#jq-scalebreaker-dialog-content {
+  padding: 30px !important;
 }
