@@ -2,7 +2,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  min-width: 100%;
   overflow: hidden;
   cursor: pointer;
   z-index: 99995;
@@ -26,6 +26,16 @@
 #jq-scalebreaker-dialog-content {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
+}
+
+#jq-scalebreaker-dialog-content:before,
+#jq-scalebreaker-dialog-content:after {
+  content: "";
+  display: table;
+}
+
+#jq-scalebreaker-dialog-content:after {
+  clear: both;
 }
 
 #jq-scalebreaker-dialog-close {
