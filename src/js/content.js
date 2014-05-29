@@ -22,8 +22,9 @@ var _jQuery = $.noConflict(true);
   function translate() {
 
     // Get the source language (selected by the user)
-    var source = slsModal.find('.kitt-translate-select-language option:selected').val();
-    console.log('SOURCE LANG', source, slsModal.find('.kitt-translate-select-language option:selected').attr('value'));
+    var $lang = slsModal.find('.kitt-translate-select-language option:selected');
+    var source = $lang.val();
+    console.log('SOURCE LANG', source, $lang.attr('value'));
 
     chrome.runtime.sendMessage(null, {
       command: 'translate',
@@ -33,8 +34,7 @@ var _jQuery = $.noConflict(true);
       if (res.err) {
         console.log('error', res.err);
         window.alert('Oops... Failed to translate. Sorry!');
-        $('body').scalebreaker('hide');
-        // TODO: Show an error.
+        if (slsModal) $('body').scalebreaker('hide');
         return;
       }
       showTranslation(res.text);
@@ -42,6 +42,8 @@ var _jQuery = $.noConflict(true);
   }
 
   function showTranslation(text) {
+    showPopup();
+
     chrome.runtime.sendMessage(null, {command: 'loadLanguage'}, function(lang) {
 
       if (lang) {
@@ -50,35 +52,44 @@ var _jQuery = $.noConflict(true);
 
       // Set the translated popup text & show it
       slsModal.find('.kitt-translate-result').html(text);
-      $('body').scalebreaker('refresh');
+      showPopup();
     });
   }
 
-  $(function() {
-
-    console.log('content script ready!');
+  function showPopup() {
+    if (slsModal) return $('body').scalebreaker('refresh');
 
     $('body').scalebreaker({
       dialogContent: $(template()),
       dialogPosition: 'bottom'
     });
 
-    slsModal = $('body').scalebreaker('getContentElement');
-
     // Retranslate the text on select change
     $('.kitt-translate-select-language').on('change', translate);
+
+    slsModal = $('body').scalebreaker('getContentElement');
+
+    $('body').scalebreaker('show');
+
+    $('body').on('dialogHidden.jq-scalebreaker', function() {
+      console.log('dialog hidden');
+      slsModal = null;
+      // Wait for the hide animation to finish.
+      window.setTimeout(function() {
+        $('body').scalebreaker('destroy');
+      }, 200);
+    });
+  }
+
+  $(function() {
 
     chrome.runtime.onMessage.addListener(
       function(request, sender, sendResponse) {
         console.log('message received:', request.event, request);
 
-
-
         switch (request.event) {
           case 'translation:loading':
-            if ($('body').scalebreaker('getDialogState') === 'hidden'){
-                $('body').scalebreaker('show');
-            }
+            if ( ! slsModal) showPopup();
             return;
 
           case 'translation:finished':
@@ -86,11 +97,13 @@ var _jQuery = $.noConflict(true);
               originalText = null;
               console.log('error', request.err);
               window.alert('Oops... Failed to translate. Sorry!');
-              $('body').scalebreaker('hide');
+              if (slsModal) $('body').scalebreaker('hide');
+              return;
             }
 
             originalText = request.originalText;
             showTranslation(request.text);
+            return;
         }
       });
   });
