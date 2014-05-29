@@ -17,6 +17,7 @@
       refreshOnScroll: true
       mobileFriendlyInitialWidth: 320
       mobileFriendlyMaxWidth: 568
+      broadcastEvents: true
       debug: false
 
     _create: ->
@@ -43,6 +44,7 @@
       @isMobileBrowser = (/iPhone|iPod|Android|BlackBerry/).test(navigator.userAgent)
       @state = 'hidden'
       @_initWidget()
+      @_logMessage 'widget created', @wrapper
 
     _initWidget: ->
       # Append the basic wrapper to the DOM.
@@ -131,9 +133,13 @@
       else if @scrollbar
         @scrollbar.refresh()
 
+    _triggerEvent: (name, data) ->
+      @element.trigger name, [data]
+      @_logMessage name, data
+
     _logMessage: (name, args) ->
       if @options.debug
-        console.log "#{@options.idNamespace}: #{name}", args
+        console.log "jq-scalebreaker: #{name}", args
 
     show: ->
       _self = this
@@ -166,7 +172,8 @@
         $(window).on "scroll.#{@options.idNamespace}",(e) ->
           _self.refresh()
       @state = 'shown'
-      @_logMessage 'showing widget'
+      if @options.broadcastEvents
+        @_triggerEvent "dialogShown.#{@options.idNamespace}", @wrapper
 
     hide: ->
       _self = this
@@ -194,7 +201,8 @@
       if @options.refreshOnScroll
         $(window).off "scroll.#{@options.idNamespace}"
       @state = 'hidden'
-      @_logMessage 'hiding widget'
+      if @options.broadcastEvents
+        @_triggerEvent "dialogHidden.#{@options.idNamespace}", @wrapper
 
     changeDialogContent: (content) ->
       @content.html content
@@ -216,7 +224,7 @@
       @_manageScrollbar()
       @_logMessage 'refreshing'
 
-    destroy: ->
+    _destroy: ->
       $(window).off "scroll.#{@options.idNamespace}"
       @wrapper.remove()
       @rawElement = null
@@ -231,8 +239,6 @@
       if @scrollbar
         @scrollbar.destroy()
       @scrollbar = null
-      @_destroy()
-
-    _destroy: $.noop
+      @_logMessage 'widget instance destroyed'
 
 ) jQuery
