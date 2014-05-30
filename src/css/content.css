@@ -21,5 +21,5 @@ clear: both;
 }
 
 #jq-scalebreaker-dialog-content {
-  padding: 30px !important;
+  padding: 30px 30px 15px 30px !important;
 }
