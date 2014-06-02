@@ -14,7 +14,8 @@
   "content_scripts": [
     {
       "matches": [
-        "http://*/*"
+        "http://*/*",
+        "https://*/*"
       ],
       "js": [
         "js/vendor/jquery-ui-scalebreaker/iscroll-lite.js",
