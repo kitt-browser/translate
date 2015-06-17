@@ -1,13 +1,13 @@
 module.exports = (grunt) ->
 
   path = require 'path'
-  
+
   # PATH where to store unzipped build
   BUILD = "build"
-  
+
   # PATH where to store final zip
   DIST = "dist"
-  
+
   # Common JS globals
   globals =
     document: false
@@ -22,7 +22,7 @@ module.exports = (grunt) ->
     localStorage: false
     XMLHttpRequest: false
 
-  
+
   # --------------------
   # Load task
   grunt.loadNpmTasks "grunt-contrib-jshint"
@@ -35,7 +35,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-s3'
 
   grunt.initConfig
-  
+
     pkg: grunt.file.readJSON('package.json')
     manifest: grunt.file.readJSON('src/manifest.json')
 
@@ -103,6 +103,10 @@ module.exports = (grunt) ->
       main:
         files: [
           {
+            src: ['api-proxy-sign']
+            cwd: '.'
+            dest: "#{BUILD}/api-proxy-sign"
+          }, {
             expand: yes
             src: ['img/**']
             cwd: 'src'
@@ -146,7 +150,7 @@ module.exports = (grunt) ->
 
   grunt.registerTask "generateCrx", ['crx:main']
 
-  
+
   grunt.registerTask "default", ['jshint', 'clean', 'browserify:dist', 'copy', 'generateCrx']
   grunt.registerTask "dev", ['jshint', 'clean', 'browserify:dev', 'copy', 'generateCrx', 'watch']
 

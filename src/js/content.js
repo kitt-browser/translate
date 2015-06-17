@@ -15,7 +15,6 @@ var _jQuery = $.noConflict(true);
 (function ($) {
 
   var slsModal;
-
   // The text to be translated (in case the user wants to re-translate)
   var originalText;
 
@@ -24,7 +23,6 @@ var _jQuery = $.noConflict(true);
     // Get the source language (selected by the user)
     var $lang = slsModal.find('.kitt-translate-select-language option:selected');
     var source = $lang.val();
-    console.log('SOURCE LANG', source, $lang.attr('value'));
 
     chrome.runtime.sendMessage(null, {
       command: 'translate',
@@ -64,6 +62,14 @@ var _jQuery = $.noConflict(true);
       dialogPosition: 'bottom'
     });
 
+    var innerHeight = window.innerHeight;
+    var timer = window.setInterval(function() {
+      if (window.innerHeight !== innerHeight) {
+        $('body').scalebreaker('refresh');
+        innerHeight = window.innerHeight;
+      }
+    }, 200);
+
     // Retranslate the text on select change
     $('.kitt-translate-select-language').on('change', translate);
 
@@ -74,6 +80,10 @@ var _jQuery = $.noConflict(true);
     $('body').on('dialogHidden.jq-scalebreaker', function() {
       console.log('dialog hidden');
       slsModal = null;
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
       // Wait for the hide animation to finish.
       window.setTimeout(function() {
         $('body').scalebreaker('destroy');

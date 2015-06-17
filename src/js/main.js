@@ -4,7 +4,7 @@ var $ = require('../vendor/jquery/jquery');
 var _ = require('../vendor/underscore/underscore');
 var common = require('./common');
 
-$.support.cors = true; 
+$.support.cors = true;
 
 var menu = chrome.contextMenus.create({
   id: "translatorContextMenu",
@@ -42,24 +42,58 @@ function translate(text, sourceLang, targetLang, callback) {
 
   console.log('translate', sourceLang, targetLang);
 
-  var params = {
-    target: targetLang,
-    q: text
-  };
+  $.get(chrome.extension.getURL('api-proxy-sign'), function(signature) {
+    $.ajax({
+      url: 'https://web-api-proxy.herokuapp.com/language/translate/v2/detect',
+      data: { q: text, key: '{TRANSLATE_KEY}' },
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-Api-Server-Host', 'https://www.googleapis.com');
+        xhr.setRequestHeader('X-Proxy-Authorization', signature);
+      },
+      success: function(data) {
+        var language = data.data.detections && data.data.detections.length &&
+          data.data.detections[0].length && data.data.detections[0][0].language;
+        console.log('retrieved language', language);
+        if (language === 'en' && sourceLang && sourceLang !== 'auto') {
+          // translating from English so invert source/target
+          targetLang = sourceLang;
+          sourceLang = 'en';
+        }
 
-  if (sourceLang != 'auto') {
-    params.source = sourceLang;
-  }
+        var params = {
+          target: targetLang,
+          q: text,
+          key: '{TRANSLATE_KEY}'
+        };
 
-  console.log('params to google API', params);
+        if (sourceLang && sourceLang !== 'auto') {
+          params.source = sourceLang;
+        }
 
-  $.get('http://google-translate-proxy-dev.salsitasoft.com/translate', params, function(data) {
-    console.log('google api success');
-    data = JSON.parse(data);
-    callback(null, data);
-  }).fail(function(err) {
-    console.log('error', err);
-    callback(err);
+        console.log('params to google API', params);
+
+        $.ajax({
+          url: 'https://web-api-proxy.herokuapp.com/language/translate/v2',
+          data: params,
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-Api-Server-Host', 'https://www.googleapis.com');
+            xhr.setRequestHeader('X-Proxy-Authorization', signature);
+          },
+          success: function(data) {
+            console.log('google api success');
+            callback(null, data);
+          },
+          error: function(err) {
+            console.log('error', err);
+            callback(err);
+          }
+        });
+      },
+      error: function(err) {
+        console.log('error', err);
+        callback(err);
+      }
+    });
   });
 }
 
