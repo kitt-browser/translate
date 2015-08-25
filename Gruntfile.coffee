@@ -22,6 +22,10 @@ module.exports = (grunt) ->
     localStorage: false
     XMLHttpRequest: false
 
+  # Check existence of cerficate
+  API_PROXY_SIGN = process.env.API_PROXY_SIGN
+  if not API_PROXY_SIGN
+    grunt.fail.fatal 'You have to specify API_PROXY_SIGN.'
 
   # --------------------
   # Load task
@@ -33,6 +37,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-bumpup'
   grunt.loadNpmTasks 'grunt-s3'
+  grunt.loadNpmTasks 'grunt-file-creator'
 
   grunt.initConfig
 
@@ -148,12 +153,19 @@ module.exports = (grunt) ->
           dest: process.env.S3_FOLDER
         ]
 
+    'file-creator':
+      conditional:
+        files: [
+          file: "#{BUILD}/api-proxy-sign",
+          method: (fs, fd, done) =>
+            fs.writeSync fd, process.env.API_PROXY_SIGN
+            done()
+        ]
+
   grunt.registerTask "generateCrx", ['crx:main']
 
-
-  grunt.registerTask "default", ['jshint', 'clean', 'browserify:dist', 'copy', 'generateCrx']
-  grunt.registerTask "dev", ['jshint', 'clean', 'browserify:dev', 'copy', 'generateCrx', 'watch']
-
+  grunt.registerTask "default", ['jshint', 'clean', 'browserify:dist', 'copy', 'file-creator', 'generateCrx']
+  grunt.registerTask "dev", ['jshint', 'clean', 'browserify:dev', 'copy', 'file-creator', 'generateCrx', 'watch']
   grunt.registerTask 'upload', ->
     grunt.fail.fatal("S3_FOLDER env var not specified") unless process.env.S3_FOLDER?
     grunt.task.run ['default', 'bumpup:patch', 's3:dist']
