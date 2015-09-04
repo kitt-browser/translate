@@ -13,6 +13,7 @@
       idNamespace: 'jq-scalebreaker'
       dialogPosition: 'bottom'
       closeOnBackdrop: true
+      showCloseButton: true
       denyUserScroll: true
       refreshOnScroll: true
       mobileFriendlyInitialWidth: 320
@@ -25,11 +26,15 @@
         "<div id='#{@options.idNamespace}-wrapper'>
           <div id='#{@options.idNamespace}-dialog-scalable'>
             <div id='#{@options.idNamespace}-dialog-scrollable'>
-              <div id='#{@options.idNamespace}-dialog-content'></div>
-              <span id='#{@options.idNamespace}-dialog-close'></span>
-            </div>
+              <div id='#{@options.idNamespace}-dialog-content'></div>"
+
+      if @options.showCloseButton
+        @rawElement += "      <span id='#{@options.idNamespace}-dialog-close'></span>"
+
+      @rawElement += "    </div>
           </div>
         </div>"
+
       @scrollbar = null
       # DOM references
       @wrapper = null
@@ -41,7 +46,7 @@
       @fullPageDimensions = {}
       @scaleFactor = null
       @currentViewportOffset = null
-      @isMobileBrowser = (/iPhone|iPod|Android|BlackBerry/).test(navigator.userAgent)
+      @isMobileBrowser = (/iPhone|iPod|iPad|Android|BlackBerry/).test(navigator.userAgent)
       @state = 'hidden'
       @_initWidget()
       @_logMessage 'widget created', @wrapper
@@ -65,22 +70,22 @@
       # Hide the scrollbars so the calculations don't fail.
       $('body').css
         'overflow': 'hidden'
-      @fullPageDimensions.Width = Math.max(document.body.offsetWidth,
+      @fullPageDimensions.width = Math.max(document.body.offsetWidth,
         document.documentElement.clientWidth,
         document.documentElement.scrollWidth,
         document.documentElement.offsetWidth)
-      @fullPageDimensions.Height = Math.max(document.body.offsetHeight,
+      @fullPageDimensions.height = Math.max(document.body.offsetHeight,
         document.documentElement.clientHeight,
         document.documentElement.scrollHeight,
         document.documentElement.offsetHeight)
       # Not setting max width in a browser with physical scrollbars makes it desktop compatible.
       if @isMobileBrowser
         @wrapper.css
-          'width': @fullPageDimensions.Width
-          'height': @fullPageDimensions.Height
+          'width': @fullPageDimensions.width
+          'height': @fullPageDimensions.height
       else
         @wrapper.css
-          'height': @fullPageDimensions.Height
+          'height': @fullPageDimensions.height
       # Revert back to the original page value.
       if bodyInlineStyle
         $('body').attr 'style', bodyInlineStyle
@@ -88,7 +93,7 @@
         $('body').removeAttr 'style'
 
     _getCurrentViewport: ->
-      @scaleFactor = window.innerWidth/@fullPageDimensions.Width
+      @scaleFactor = window.innerWidth/@fullPageDimensions.width
       @_logMessage 'scale factor', @scaleFactor
       # This may be too iPhony (though nice), needs testing across browsers and devices.
       @currentViewportOffset = [window.pageXOffset, window.pageYOffset]
@@ -99,8 +104,8 @@
       if !@isMobileBrowser
         @dialog.css
           'left': @currentViewportOffset[0]
-      else if @isMobileBrowser and (@fullPageDimensions.Width > @options.mobileFriendlyMaxWidth)
-        mobileFriendlyScaleFactor = @fullPageDimensions.Width / @options.mobileFriendlyInitialWidth
+      else if @isMobileBrowser and (@fullPageDimensions.width > @options.mobileFriendlyMaxWidth)
+        mobileFriendlyScaleFactor = @fullPageDimensions.width / @options.mobileFriendlyInitialWidth
         @dialog.css
           'width': @options.mobileFriendlyInitialWidth
           'left': @currentViewportOffset[0]
@@ -119,7 +124,7 @@
           '-webkit-transform-origin': '0 0'
       if @options.dialogPosition is 'bottom'
         @dialog.css
-          'bottom': @fullPageDimensions.Height - (@currentViewportOffset[1] + window.innerHeight)
+          'bottom': @fullPageDimensions.height - (@currentViewportOffset[1] + window.innerHeight)
           'transform-origin': '0 100%'
           '-webkit-transform-origin': '0 100%'
 
@@ -167,13 +172,18 @@
           if e.target is _self.scrollarea.get(0)
             _self.wrapper.removeClass "#{_self.options.idNamespace}-animate-in"
             _self.wrapper.off 'animationend webkitAnimationEnd'
+            _self.state = 'shown'
+            if _self.options.broadcastEvents
+              _self._triggerEvent "dialogShown.#{_self.options.idNamespace}", _self.wrapper
+      else
+        @state = 'shown'
+        if @options.broadcastEvents
+          @_triggerEvent "dialogShown.#{@options.idNamespace}", @wrapper
       # Refresh the dialog on an unexpected scroll event.
       if @options.refreshOnScroll
         $(window).on "scroll.#{@options.idNamespace}",(e) ->
           _self.refresh()
-      @state = 'shown'
-      if @options.broadcastEvents
-        @_triggerEvent "dialogShown.#{@options.idNamespace}", @wrapper
+
 
     hide: ->
       _self = this
@@ -188,21 +198,20 @@
           if e.target is _self.scrollarea.get(0)
             _self.wrapper.removeClass "#{_self.options.idNamespace}-animate-out"
             _self.wrapper.removeClass "#{_self.options.idNamespace}-show"
-            # Remove inline CSS from the scaling.
-            # _self.dialog.removeAttr 'style'
             _self.wrapper.off 'animationend webkitAnimationEnd'
+            _self.state = 'hidden'
+            if _self.options.broadcastEvents
+              _self._triggerEvent "dialogHidden.#{_self.options.idNamespace}", _self.wrapper
       # Or just close.
       else if @options.closeOnBackdrop
         _self.wrapper.off "click.#{@options.idNamespace}"
         @wrapper.removeClass "#{@options.idNamespace}-show"
-        # Remove inline CSS from the scaling.
-        # @dialog.removeAttr 'style'
+        @state = 'hidden'
+        if @options.broadcastEvents
+          @_triggerEvent "dialogHidden.#{@options.idNamespace}", @wrapper
       # Remove the scroll event bind.
       if @options.refreshOnScroll
         $(window).off "scroll.#{@options.idNamespace}"
-      @state = 'hidden'
-      if @options.broadcastEvents
-        @_triggerEvent "dialogHidden.#{@options.idNamespace}", @wrapper
 
     changeDialogContent: (content) ->
       @content.html content
