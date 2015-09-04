@@ -40,8 +40,6 @@ var _jQuery = $.noConflict(true);
   }
 
   function showTranslation(text) {
-    showPopup();
-
     chrome.runtime.sendMessage(null, {command: 'loadLanguage'}, function(lang) {
 
       if (lang) {
@@ -50,45 +48,38 @@ var _jQuery = $.noConflict(true);
 
       // Set the translated popup text & show it
       slsModal.find('.kitt-translate-result').html(text);
-      showPopup();
+
+      if ($('body').scalebreaker('getDialogState') == 'shown') {
+        $('body').scalebreaker('refresh');
+      } else {
+        showPopup();
+      }
     });
   }
 
   function showPopup() {
-    if (slsModal) return $('body').scalebreaker('refresh');
+    if (slsModal) {
+      slsModal = $('body').scalebreaker('getContentElement');
+      $('body').scalebreaker('refresh').scalebreaker('show');
+    } else {
+      $('body').scalebreaker({
+        dialogContent: $(template()),
+        dialogPosition: 'bottom'
+      });
 
-    $('body').scalebreaker({
-      dialogContent: $(template()),
-      dialogPosition: 'bottom'
-    });
-
-    var innerHeight = window.innerHeight;
-    var timer = window.setInterval(function() {
-      if (window.innerHeight !== innerHeight) {
-        $('body').scalebreaker('refresh');
-        innerHeight = window.innerHeight;
-      }
-    }, 200);
-
-    // Retranslate the text on select change
-    $('.kitt-translate-select-language').on('change', translate);
-
-    slsModal = $('body').scalebreaker('getContentElement');
-
-    $('body').scalebreaker('show');
-
-    $('body').on('dialogHidden.jq-scalebreaker', function() {
-      console.log('dialog hidden');
-      slsModal = null;
-      if (timer) {
-        window.clearInterval(timer);
-        timer = null;
-      }
-      // Wait for the hide animation to finish.
-      window.setTimeout(function() {
-        $('body').scalebreaker('destroy');
+      var innerHeight = window.innerHeight;
+      var timer = window.setInterval(function() {
+        if (window.innerHeight !== innerHeight) {
+          $('body').scalebreaker('refresh');
+          innerHeight = window.innerHeight;
+        }
       }, 200);
-    });
+
+      // Retranslate the text on select change
+      $('.kitt-translate-select-language').on('change', translate);
+
+      slsModal = $('body').scalebreaker('getContentElement');
+    }
   }
 
   $(function() {
